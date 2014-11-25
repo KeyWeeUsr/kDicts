@@ -14,9 +14,6 @@ import os
 import time
 import sys
 
-reload(sys)
-sys.setdefaultencoding('utf-8')
-
 Builder.load_string('''
 <Body>:
     orientation: 'vertical'
@@ -294,43 +291,41 @@ class NewWord(ModalView):
     pass
 
 class Word(BoxLayout):
-    word = StringProperty()
     val = StringProperty()
+    word = StringProperty()
     
 class Body(BoxLayout):
+
+    capital=0
+    dictionary = {}
+    path = os.path.dirname(os.path.abspath(__file__))+'/data'
+    selectedlabel = 'word'
+    temp = {}
+    words_height = BoundedNumericProperty(0,min=0)
+
     def __init__(self, **kwargs):
         super(Body,self).__init__(**kwargs)
         self.modalnew = NewWord()
         self.modalnew.body = self
         self.load()
-    temp = {}
-    dictionary = {}
-    path = os.path.dirname(os.path.abspath(__file__))+'/data'
-    words_height = BoundedNumericProperty(0,min=0)
+
     def load(self):
         with open(self.path+'/gloss.txt') as f:
            for line in f:
                (key,val) = line.split()
                self.temp[str(key)] = val
-        #print 'file to temp done'
         self.dictionary = self.temp
         self.temp = {}
-        #print 'temp to dict done, temp del'
-        #print self.dictionary
-        #print 'dict^^'
-        #print self.temp
-        #print 'temp^^'
         self.ids.scrollwords.clear_widgets(children=None)
         for i in sorted(self.dictionary):
             self.words_height = self.words_height + 20
             self.ids.scrollwords.add_widget(Word(word=str(i),val=str(self.dictionary[i])))
+
     def save(self):
         with open(self.path+'/gloss.txt','w') as f:
             for i in self.dictionary:
                 f.write(str(i + ' ' + self.dictionary[i] + '\n'))
-        print 'save done'
-        with open(self.path+'/gloss.txt', 'rU') as f:
-            print f.readlines()
+
     def backup(self):
         filetime = str(time.ctime())
         filetime = filetime.replace(' ','_')
@@ -338,23 +333,25 @@ class Body(BoxLayout):
         with open(self.path+'/gloss' + filetime + '.txt', 'w') as f:
             for i in self.dictionary:
                 f.write(str(i + ' ' + self.dictionary[i] + '\n'))
+
     def next(self):
         self.selectedlabel = 'trans'
+
     def back(self):
         self.selectedlabel = 'word'
-    selectedlabel = 'word'
+
     def add(self):
         self.backup()
         word = self.modalnew.ids.newone.text
         tran = self.modalnew.ids.newonetrans.text
         self.dictionary[word] = tran
         self.save()
-        print self.dictionary
         self.selectedlabel = 'word'
         self.load()
         self.modalnew.ids.newone.text = ''
         self.modalnew.ids.newonetrans.text = ''
         self.modalnew.dismiss()
+
     def write(self, letter):
         if self.capital == 0:
             if self.selectedlabel == 'word':
@@ -366,16 +363,22 @@ class Body(BoxLayout):
                 self.modalnew.ids.newone.text = self.modalnew.ids.newone.text + letter.upper()
             elif self.selectedlabel == 'trans':
                 self.modalnew.ids.newonetrans.text = self.modalnew.ids.newonetrans.text + letter.upper()
+
     def erase(self):
         if self.selectedlabel == 'word':
             self.modalnew.ids.newone.text = self.modalnew.ids.newone.text[:-1]
         elif self.selectedlabel == 'trans':
             self.modalnew.ids.newonetrans.text = self.modalnew.ids.newonetrans.text[:-1]
-    capital=0
+
     def shift(self):
-        self.capital=1
+        if self.capital == 0:
+            self.capital=1
+        elif self.capital ==1:
+            self.capital=0
+
     def change(self, screen):
         self.modalnew.ids.kboard.current = screen
+
 class Glossary(App):
     def build(self):
         return Body()
