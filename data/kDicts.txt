@@ -1,0 +1,3 @@
+example translation
+long_phrase long_translation
+Noun n_color
