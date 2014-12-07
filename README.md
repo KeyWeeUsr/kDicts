@@ -5,13 +5,19 @@ kDicts is a simple app for anyone who loves to study foreign languages with a li
   - Simple dark interface for comfortable use
   - Word class highlighting
   - Manual editing(swipe right to left)
+  - Color styles(swipe left to right)
 
 kDicts is written in Python and runs under Kivy framework.
 You can clone the repository to your /sdcard/kivy/kDicts or install it from APK.
 
-![alt text](https://raw.githubusercontent.com/KeyWeeUsr/kDicts/master/scrs/v0.4.png "Logo Title Text 1")
+![alt text](https://raw.githubusercontent.com/KeyWeeUsr/kDicts/master/scrs/v0.5.png)
 
 ### Version
+0.5
+- Bubble-like buttons
+- Fixed crashing(adding empty words)
+- Added color styles
+
 0.4
 - Prefixes
 - Colors

@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 
 __author__ = "KeyWeeUsr"
-__version__ = "0.4.0"
+__version__ = "0.5.0"
 
 from kivy.app import App
 from kivy.lang import Builder
 from kivy.uix.label import Label
+from kivy.uix.image import Image
+from kivy.uix.widget import Widget
 from kivy.uix.button import Button
 from kivy.uix.spinner import Spinner
 from kivy.uix.carousel import Carousel
@@ -13,7 +15,9 @@ from kivy.uix.scrollview import ScrollView
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.modalview import ModalView
-from kivy.properties import StringProperty, BoundedNumericProperty
+from kivy.graphics import Color, Rectangle
+from kivy.uix.behaviors import ButtonBehavior
+from kivy.properties import StringProperty, BoundedNumericProperty, ListProperty
 
 import os
 import sys
@@ -21,23 +25,32 @@ import time
 
 Builder.load_string('''
 <Body>:
+    canvas:
+        Color:
+            rgba: root.bg
+        Rectangle:
+            size: self.size
+            pos: self.pos
     orientation: 'vertical'
     BoxLayout:
         size_hint: 1,0.08
-        Button:
+        BubbleButton:
             text: 'Add'
             on_release: root.newword.open()
         Label:
-            text: 'kDicts v0.4'
+            text: 'kDicts v0.5'
         BoxLayout:
-            Button:
+            BubbleButton:
                 text: 'Color'
                 on_release: root.color.open()
-            Button:
+            BubbleButton:
                 text: 'About'
                 on_release: root.about()
     Carousel:
         id: slides
+        index: 1
+        StyleChooser:
+            orientation: 'vertical'
         ScrollView:
             GridLayout:
                 cols: 1
@@ -47,19 +60,20 @@ Builder.load_string('''
         BoxLayout:
             orientation: 'vertical'
             TextInput:
-                background_color: 0,0,0,1
+                background_color: 0,0,0,0
                 foreground_color: 1,1,1,1
                 id: EditText
                 hint_text: 'Press \\'Load\\' button.'
+                hint_text_color: 1,1,1,1
             BoxLayout:
                 size_hint_y: 0.1
-                Button:
+                BubbleButton:
                     text: 'Save'
                     on_release: root.edit_save()
-                Button:
+                BubbleButton:
                     text: 'Load'
                     on_release: root.edit_load()
-                Button:
+                BubbleButton:
                     text: 'Help'
                     on_release: root.edit_help()
 
@@ -74,6 +88,7 @@ Builder.load_string('''
 
 <NewWord>:
     size_hint: 0.6,0.8
+    background: root.path+'/bg.png'
     BoxLayout:
         spacing: 10
         size_hint:0.5,0.7
@@ -112,10 +127,10 @@ Builder.load_string('''
             size_hint: 1,0.2
             size: 0,50
             pos_hint: {'center_x':0.5}
-            Button:
+            BubbleButton:
                 text: 'Done'
                 on_release: root.body.add()
-            Button:
+            BubbleButton:
                 text: 'Back'
                 on_release: root.dismiss()
                 
@@ -126,7 +141,7 @@ Builder.load_string('''
         size_hint: 0.8,0.8
         orientation: 'vertical'
         Label:
-            text: '(C) KeyWeeUsr\\n(P.B.) 2014\\n[i]https://github.com/KeyWeeUsr[/i]'
+            text: '(C) KeyWeeUsr\\n(P.B.) 2014\\n[i]https://github.com/KeyWeeUsr[/i]\\n[i]https://facebook.com/kDicts[/i]'
             markup: True
 
 <EditHelp>:
@@ -152,7 +167,84 @@ Builder.load_string('''
             id: testing
             text: """[i][color=#0290C8]Nouns[/color]\\n[color=#53BE29]Adjectives[/color]\\n[color=#A65C8B]Pronouns[/color]\\n[color=#FFD01E]Numerals[/color]\\n[color=#F42E00]Verbs[/color]\\n[color=#F997DE]Adverbs[/color]\\n[color=#B665E2]Prepositions[/color]\\n[color=#F0DC82]Conjunctions[/color]\\n[color=#20DFEB]Particles[/color][/i]"""
             markup: True
+
+<StyleChooser>:
+    orientation: 'vertical'
+    size_hint: 0.5,0.5
+    pos_hint: {'center_x':0.5,'center_y':0.5}
+    cols: 3
+    spacing: 10
+    StyleItem:
+        stylecolor: (0,0,0,1)
+        color: 1,1,1,1
+        on_release: root.changestyleitem(self.stylecolor)
+    StyleItem:
+        stylecolor: (0.5,0.5,0.5,1)
+        on_release: root.changestyleitem(self.stylecolor)
+    StyleItem:
+        stylecolor: (0.8,0.5,0.5,1)
+        on_release: root.changestyleitem(self.stylecolor)
+    StyleItem:
+        stylecolor: (0.9,0.8,0.6,1)
+        on_release: root.changestyleitem(self.stylecolor)
+    StyleItem:
+        stylecolor: (0.5,0.3,0.5,1)
+        on_release: root.changestyleitem(self.stylecolor)
+    StyleItem:
+        stylecolor: (0.7,0.7,0.7,1)
+        on_release: root.changestyleitem(self.stylecolor)
+
+<StyleItem>:
+    stylecolor: self.stylecolor
+    text: self.text
+    canvas:
+        Color:
+            rgba: 1,1,1,1
+        Rectangle:
+            size: self.size
+            pos: self.pos
+        Color:
+            rgba: root.stylecolor
+        Rectangle:
+            size: self.size[0]-4,self.size[1]-4
+            pos: self.pos[0]+2,self.pos[1]+2
+    Label:
+        text: root.text
+        pos: root.pos[0],root.pos[1]
+
+<BubbleButton>:
+    text: 'test'
+    Image:
+        source: 'data/bubblebutton.png'
+        size_hint: None,None
+        pos: root.pos
+        size: root.size
+        allow_stretch: True
+        keep_ratio: False
+
+<WarningPopup>:
+    size_hint: 0.4,0.2
+    background: root.path+'/bg.png'
+    Label:
+        text: root.text
+        font_size: 16
 ''')
+
+class WarningPopup(ModalView):
+    text = StringProperty()
+    path = os.path.dirname(os.path.abspath(__file__))+'/data'
+
+class BubbleButton(ButtonBehavior, Widget):
+    path = os.path.dirname(os.path.abspath(__file__))+'/data'
+
+class StyleItem(ButtonBehavior, Widget):
+    stylecolor = ListProperty()
+    text = StringProperty()
+    
+class StyleChooser(GridLayout):
+
+    def changestyleitem(self, color):
+        self.body.bg = color
 
 class ColorPopup(ModalView):
     path = os.path.dirname(os.path.abspath(__file__))+'/data'
@@ -178,6 +270,7 @@ class Body(BoxLayout):
     words_height = BoundedNumericProperty(0,min=0)
     prefix = {'n_':'#0290C8','adj_':'#53BE29','pro_':'#A65C8B','num_':'#FFD01E','v_':'#F42E00','adv_':'#F997DE','pre_':'#B665E2','con_':'#F0DC82','par_':'#20DFEB'}
     wclass = {'Word classes':'','Nouns':'n_','Adjectives':'adj_','Pronouns':'pro_','Numerals':'num_','Verbs':'v_','Adverbs':'adv_','Prepositions':'pre_','Conjunctions':'con_','Particles':'par_'}
+    bg = ListProperty([0,0,0,1])
 
     def __init__(self, **kwargs):
         super(Body,self).__init__(**kwargs)
@@ -186,6 +279,9 @@ class Body(BoxLayout):
         self.aboutpopup = AboutPopup()
         self.color = ColorPopup()
         self.edithelp = EditHelp()
+        self.stylechooser = StyleChooser
+        self.stylechooser.body = self
+        self.warning = WarningPopup()
         self.load()
 
     def load(self):
@@ -236,12 +332,18 @@ class Body(BoxLayout):
                 f.write(str(i + ' ' + self.dictionary[i] + '\n'))
 
     def add(self):
-        self.backup()
-        word = str(self.newword.ids.newone.text).replace(' ','_')
-        translation = self.wclass[str(self.newword.ids.wordclass.text)]+str(self.newword.ids.newonetrans.text).replace(' ','_')
-        self.dictionary[word] = translation
-        self.save()
-        self.load()
+        word = ''
+        translation = ''
+        if (word != '') and (translation != ''):
+            self.backup()
+            word = str(self.newword.ids.newone.text).replace(' ','_')
+            translation = self.wclass[str(self.newword.ids.wordclass.text)]+str(self.newword.ids.newonetrans.text).replace(' ','_')
+            self.dictionary[word] = translation
+            self.save()
+            self.load()
+        elif (word == '') or (translation == ''):
+            self.warning.text = 'Input must not be empty!!!'
+            self.warning.open()
         self.newword.dismiss()
         self.newword.ids.newone.text = ''
         self.newword.ids.newonetrans.text = ''
@@ -264,12 +366,15 @@ class Body(BoxLayout):
         self.edithelp.open()
 
 class kDicts(App):
-
+        
     use_kivy_settings = False
     def open_settings(self,*largs):
         pass
 
-    def build(self):
+    def on_pause(self):
+        return True
+
+    def build(self):            
         return Body()
 
 if __name__ == '__main__':

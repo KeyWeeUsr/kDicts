@@ -1,3 +1,9 @@
-example translation
-long_phrase long_translation
-Noun n_color
+Noun n_example
+Adverb adv_example
+Particle par_example
+Adjective adj_example
+Preposition pre_example
+Verb v_example
+Numeral num_example
+Conjunction con_example
+Pronoun pro_example
