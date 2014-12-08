@@ -9,6 +9,7 @@ kDicts is a simple app for anyone who loves to study foreign languages with a li
 
 kDicts is written in Python and runs under Kivy framework.
 You can clone the repository to your /sdcard/kivy/kDicts or install it from APK.
+Like the app on facebook too: https://www.facebook.com/kDicts
 
 ![alt text](https://raw.githubusercontent.com/KeyWeeUsr/kDicts/master/scrs/v0.5.png)
 
