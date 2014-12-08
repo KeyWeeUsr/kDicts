@@ -332,8 +332,8 @@ class Body(BoxLayout):
                 f.write(str(i + ' ' + self.dictionary[i] + '\n'))
 
     def add(self):
-        word = ''
-        translation = ''
+        word = self.newword.ids.newone.text
+        translation = self.newword.ids.newonetrans.text
         if (word != '') and (translation != ''):
             self.backup()
             word = str(self.newword.ids.newone.text).replace(' ','_')
