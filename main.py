@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 __author__ = "KeyWeeUsr"
-__version__ = "0.5.0"
+__version__ = "0.6.0"
 
 from kivy.app import App
 from kivy.lang import Builder
@@ -17,6 +17,7 @@ from kivy.uix.gridlayout import GridLayout
 from kivy.uix.modalview import ModalView
 from kivy.graphics import Color, Rectangle
 from kivy.uix.behaviors import ButtonBehavior
+from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.properties import StringProperty, BoundedNumericProperty, ListProperty
 
 import os
@@ -34,11 +35,16 @@ Builder.load_string('''
     orientation: 'vertical'
     BoxLayout:
         size_hint: 1,0.08
-        BubbleButton:
-            text: 'Add'
-            on_release: root.newword.open()
+        BoxLayout:
+            BubbleButton:
+                text: 'Add'
+                on_release: root.newword.open()
+            BubbleButton:
+                text: 'B/R'
+                on_release: root.ids.sm.transition.direction = 'down'
+                on_release: root.ids.sm.current = 'backup'
         Label:
-            text: 'kDicts v0.5'
+            text: 'kDicts v0.6'
         BoxLayout:
             BubbleButton:
                 text: 'Color'
@@ -46,36 +52,71 @@ Builder.load_string('''
             BubbleButton:
                 text: 'About'
                 on_release: root.about()
-    Carousel:
-        id: slides
-        index: 1
-        StyleChooser:
-            orientation: 'vertical'
-        ScrollView:
-            GridLayout:
-                cols: 1
-                id: scrollwords
-                size_hint: 1,None
-                size: 0,root.words_height
-        BoxLayout:
-            orientation: 'vertical'
-            TextInput:
-                background_color: 0,0,0,0
-                foreground_color: 1,1,1,1
-                id: EditText
-                hint_text: 'Press \\'Load\\' button.'
-                hint_text_color: 1,1,1,1
+    ScreenManager:
+        id: sm
+        Screen:
+            name: 'main'
+            Carousel:
+                id: slides
+                index: 1
+                StyleChooser:
+                    orientation: 'vertical'
+                ScrollView:
+                    GridLayout:
+                        cols: 1
+                        id: scrollwords
+                        size_hint: 1,None
+                        size: 0,root.words_height
+                BoxLayout:
+                    orientation: 'vertical'
+                    TextInput:
+                        background_color: 0,0,0,0
+                        foreground_color: 1,1,1,1
+                        id: EditText
+                        hint_text: 'Press \\'Load\\' button.'
+                        hint_text_color: 1,1,1,1
+                    BoxLayout:
+                        size_hint_y: 0.1
+                        BubbleButton:
+                            text: 'Save'
+                            on_release: root.edit_save()
+                        BubbleButton:
+                            text: 'Load'
+                            on_release: root.edit_load()
+                        BubbleButton:
+                            text: 'Help'
+                            on_release: root.edit_help()
+        Screen:
+            name: 'backup'
             BoxLayout:
-                size_hint_y: 0.1
+                orientation: 'vertical'
+                TextInput:
+                    id: backrest
+                    background_color: 0,0,0,0
+                    foreground_color: 1,1,1,1
+                    hint_text: 'Backup:\\nInsert a path similar to:\\n\\'/sdcard/\\'\\n\\nRestore:\\nInsert a path similar to:\\n\\'/sdcard/[name_of_your_backup_file].txt\\''
+                    hint_text_color: 1,1,1,1
+                    multiline: False
+                    size_hint: 1,1
+                    pos_hint: {'center_x':0.5}
+                BoxLayout:
+                    spacing: '20'
+                    size_hint: 0.5,None
+                    size: 0,50
+                    pos_hint: {'center_x':0.5}
+                    BubbleButton:
+                        text: 'Backup'
+                        on_release: root.backup(root.ids.backrest.text)
+                    BubbleButton:
+                        text: 'Restore'
+                        on_release: root.restore(root.ids.backrest.text)
                 BubbleButton:
-                    text: 'Save'
-                    on_release: root.edit_save()
-                BubbleButton:
-                    text: 'Load'
-                    on_release: root.edit_load()
-                BubbleButton:
-                    text: 'Help'
-                    on_release: root.edit_help()
+                    text: 'Back'
+                    size_hint: 0.3,None
+                    size: 0,50
+                    pos_hint: {'center_x':0.5}
+                    on_release: root.ids.sm.transition.direction = 'up'
+                    on_release: root.ids.sm.current = 'main'
 
 <Word>
     size_hint: 1,None
@@ -215,7 +256,7 @@ Builder.load_string('''
 <BubbleButton>:
     text: 'test'
     Image:
-        source: 'data/bubblebutton.png'
+        source: 'app_data/bubblebutton.png'
         size_hint: None,None
         pos: root.pos
         size: root.size
@@ -232,10 +273,10 @@ Builder.load_string('''
 
 class WarningPopup(ModalView):
     text = StringProperty()
-    path = os.path.dirname(os.path.abspath(__file__))+'/data'
+    path = os.path.dirname(os.path.abspath(__file__))+'/app_data'
 
 class BubbleButton(ButtonBehavior, Widget):
-    path = os.path.dirname(os.path.abspath(__file__))+'/data'
+    path = os.path.dirname(os.path.abspath(__file__))+'/app_data'
 
 class StyleItem(ButtonBehavior, Widget):
     stylecolor = ListProperty()
@@ -245,9 +286,10 @@ class StyleChooser(GridLayout):
 
     def changestyleitem(self, color):
         self.body.bg = color
+        self.body.savestyle()
 
 class ColorPopup(ModalView):
-    path = os.path.dirname(os.path.abspath(__file__))+'/data'
+    path = os.path.dirname(os.path.abspath(__file__))+'/app_data'
 
 class Word(BoxLayout):
     word = StringProperty()
@@ -255,22 +297,24 @@ class Word(BoxLayout):
     color = StringProperty('#FF0000')
 
 class EditHelp(ModalView):
-    path = os.path.dirname(os.path.abspath(__file__))+'/data'
+    path = os.path.dirname(os.path.abspath(__file__))+'/app_data'
 
 class NewWord(ModalView):
-    path = os.path.dirname(os.path.abspath(__file__))+'/data'
+    path = os.path.dirname(os.path.abspath(__file__))+'/app_data'
 
 class AboutPopup(ModalView):
-    path = os.path.dirname(os.path.abspath(__file__))+'/data'
+    path = os.path.dirname(os.path.abspath(__file__))+'/app_data'
 
 class Body(BoxLayout):
 
     dictionary = {}
     path = os.path.dirname(os.path.abspath(__file__))+'/data'
+    app_path = os.path.dirname(os.path.abspath(__file__))+'/app_data'
     words_height = BoundedNumericProperty(0,min=0)
     prefix = {'n_':'#0290C8','adj_':'#53BE29','pro_':'#A65C8B','num_':'#FFD01E','v_':'#F42E00','adv_':'#F997DE','pre_':'#B665E2','con_':'#F0DC82','par_':'#20DFEB'}
     wclass = {'Word classes':'','Nouns':'n_','Adjectives':'adj_','Pronouns':'pro_','Numerals':'num_','Verbs':'v_','Adverbs':'adv_','Prepositions':'pre_','Conjunctions':'con_','Particles':'par_'}
     bg = ListProperty([0,0,0,1])
+    trash = 0
 
     def __init__(self, **kwargs):
         super(Body,self).__init__(**kwargs)
@@ -283,6 +327,21 @@ class Body(BoxLayout):
         self.stylechooser.body = self
         self.warning = WarningPopup()
         self.load()
+        self.loadstyle()
+        self.shredder()
+
+    def loadstyle(self):
+        try:
+            with open(self.app_path+'/config.txt','rU') as f:
+                lines = f.readlines()
+            self.bg = (float(lines[0][:-1]),float(lines[1][:-1]),float(lines[2][:-1]),float(lines[3][:-1]))
+        except IOError:
+            self.bg = [0,0,0,1]
+
+    def savestyle(self):
+        with open(self.app_path+'/config.txt','w') as f:
+            for i in range(len(self.bg)):
+                f.write(str(self.bg[i])+'\n')            
 
     def load(self):
         with open(self.path+'/kDicts.txt','rU') as f:
@@ -320,11 +379,43 @@ class Body(BoxLayout):
                 continue
         return temp
 
-    def backup(self):
-        filetime = str(time.ctime()).replace(' ','_').replace(':','_')
-        with open(self.path+'/kDicts' + filetime + '.txt', 'w') as f:
-            for i in self.dictionary:
-                f.write(str(i + ' ' + self.dictionary[i] + '\n'))
+    def backup(self,path):
+        if path != '':
+            filetime = str(time.ctime()).replace(' ','_').replace(':','_')
+            with open(path+'/kDicts' + filetime + '.txt', 'w') as f:
+                for i in self.dictionary:
+                    f.write(str(i + ' ' + self.dictionary[i] + '\n'))
+            if path != self.path:
+                self.ids.backrest.text = ''
+                self.ids.sm.transition.direction = 'up'
+                self.ids.sm.current = 'main'
+                
+        elif path == '':
+            self.warning.text = 'Path must not be empty!!!'
+            self.warning.open()
+
+    def restore(self, path):
+        if path != '':
+            self.dictionary = {}
+            with open(path,'rU') as f:
+               for line in f:
+                   (word,translation) = line.split()
+                   self.dictionary[str(word)] = translation
+            self.ids.scrollwords.clear_widgets(children=None)
+            self.words_height=0
+            each_word = 0
+            for i in sorted(self.dictionary):
+                self.ids.scrollwords.add_widget(Word(color=str(self.checkprefix(str(self.dictionary[i]))),word=str(i).replace('_',' '),translation=str(str(self.removeprefix(self.dictionary[i])).replace('_',' '))))
+                each_word = each_word+1
+            self.words_height = each_word*20 + each_word*10
+            self.ids.scrollwords.size = (0,int(self.words_height))
+            self.save()
+            self.ids.backrest.text = ''
+            self.ids.sm.transition.direction = 'up'
+            self.ids.sm.current = 'main'
+        elif path == '':
+            self.warning.text = 'Path must not be empty!!!'
+            self.warning.open()
 
     def save(self):
         with open(self.path+'/kDicts.txt','w') as f:
@@ -335,7 +426,7 @@ class Body(BoxLayout):
         word = self.newword.ids.newone.text
         translation = self.newword.ids.newonetrans.text
         if (word != '') and (translation != ''):
-            self.backup()
+            self.backup(self.path)
             word = str(self.newword.ids.newone.text).replace(' ','_')
             translation = self.wclass[str(self.newword.ids.wordclass.text)]+str(self.newword.ids.newonetrans.text).replace(' ','_')
             self.dictionary[word] = translation
@@ -352,9 +443,10 @@ class Body(BoxLayout):
         self.aboutpopup.open()
 
     def edit_save(self):
-        self.backup()
+        self.backup(self.path)
         with open(self.path+'/kDicts.txt','w') as f:
             f.write(str(self.ids.EditText.text))
+        self.dictionary = {}
         self.load()
         self.ids.slides.load_previous()
 
@@ -364,6 +456,18 @@ class Body(BoxLayout):
 
     def edit_help(self):
         self.edithelp.open()
+
+    def shredder(self):
+        files = os.listdir(self.path)
+        self.trash = len(files)-1
+        if self.trash >=5:
+            if  'kDicts.txt' in files:
+                files.remove('kDicts.txt')
+                files.sort()
+                for i in range(len(files)-1):
+                    os.remove(self.path+'/'+files[i])
+                self.trash = len(files)
+        else: pass
 
 class kDicts(App):
         
