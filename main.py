@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 __author__ = "KeyWeeUsr"
-__version__ = "0.6.0"
+__version__ = "0.7.0"
 
 from kivy.app import App
 from kivy.lang import Builder
@@ -44,7 +44,7 @@ Builder.load_string('''
                 on_release: root.ids.sm.transition.direction = 'down'
                 on_release: root.ids.sm.current = 'backup'
         Label:
-            text: 'kDicts v0.6'
+            text: 'kDicts v0.7'
         BoxLayout:
             BubbleButton:
                 text: 'Color'
@@ -59,8 +59,13 @@ Builder.load_string('''
             Carousel:
                 id: slides
                 index: 1
-                StyleChooser:
-                    orientation: 'vertical'
+                ScrollView:
+                    size_hint: 0.6,0.99
+                    pos_hint: {'center_x':0.5}
+                    bar_color: 1,1,1,0
+                    bar_inactive_color: 1,1,1,0
+                    StyleChooser:
+                        orientation: 'vertical'
                 ScrollView:
                     GridLayout:
                         cols: 1
@@ -69,12 +74,15 @@ Builder.load_string('''
                         size: 0,root.words_height
                 BoxLayout:
                     orientation: 'vertical'
-                    TextInput:
-                        background_color: 0,0,0,0
-                        foreground_color: 1,1,1,1
-                        id: EditText
-                        hint_text: 'Press \\'Load\\' button.'
-                        hint_text_color: 1,1,1,1
+                    ScrollView:
+                        TextInput:
+                            size_hint: 1,None
+                            height: max(self.minimum_height, self.parent.height)
+                            background_color: 0,0,0,0
+                            foreground_color: 1,1,1,1
+                            id: EditText
+                            hint_text: 'Press \\'Load\\' button.'
+                            hint_text_color: 1,1,1,1
                     BoxLayout:
                         size_hint_y: 0.1
                         BubbleButton:
@@ -211,13 +219,16 @@ Builder.load_string('''
 
 <StyleChooser>:
     orientation: 'vertical'
-    size_hint: 0.5,0.5
+    size_hint: 1,None
+    height: self.minimum_height
     pos_hint: {'center_x':0.5,'center_y':0.5}
-    cols: 3
+    cols: 2
     spacing: 10
     StyleItem:
         stylecolor: (0,0,0,1)
-        color: 1,1,1,1
+        on_release: root.changestyleitem(self.stylecolor)
+    StyleItem:
+        stylecolor: (0.8,0.4,0.4,1)
         on_release: root.changestyleitem(self.stylecolor)
     StyleItem:
         stylecolor: (0.5,0.5,0.5,1)
@@ -226,18 +237,28 @@ Builder.load_string('''
         stylecolor: (0.8,0.5,0.5,1)
         on_release: root.changestyleitem(self.stylecolor)
     StyleItem:
+        stylecolor: (0.7,0.7,0.7,1)
+        on_release: root.changestyleitem(self.stylecolor)
+    StyleItem:
         stylecolor: (0.9,0.8,0.6,1)
         on_release: root.changestyleitem(self.stylecolor)
     StyleItem:
         stylecolor: (0.5,0.3,0.5,1)
         on_release: root.changestyleitem(self.stylecolor)
     StyleItem:
-        stylecolor: (0.7,0.7,0.7,1)
+        stylecolor: (0.3,0.6,0.4,1)
+        on_release: root.changestyleitem(self.stylecolor)
+    StyleItem:
+        stylecolor: (0.5,0.6,1,1)
+        on_release: root.changestyleitem(self.stylecolor)
+    StyleItem:
+        stylecolor: (0.5,0.8,0.7,1)
         on_release: root.changestyleitem(self.stylecolor)
 
 <StyleItem>:
     stylecolor: self.stylecolor
-    text: self.text
+    size_hint: 1,None
+    height: self.size[0]
     canvas:
         Color:
             rgba: 1,1,1,1
@@ -249,9 +270,6 @@ Builder.load_string('''
         Rectangle:
             size: self.size[0]-4,self.size[1]-4
             pos: self.pos[0]+2,self.pos[1]+2
-    Label:
-        text: root.text
-        pos: root.pos[0],root.pos[1]
 
 <BubbleButton>:
     text: 'test'
@@ -449,6 +467,8 @@ class Body(BoxLayout):
         self.dictionary = {}
         self.load()
         self.ids.slides.load_previous()
+        self.ids.EditText.text = ''
+        self.ids.EditText.focus = False
 
     def edit_load(self):
         with open(self.path+'/kDicts.txt','rU') as f:

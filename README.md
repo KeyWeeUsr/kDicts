@@ -12,9 +12,13 @@ kDicts is written in Python and runs under Kivy framework.
 You can clone the repository to your /sdcard/kivy/kDicts or install it from APK. Before every update backup your app data!
 Like the app on facebook too: https://www.facebook.com/kDicts
 
-![alt text](https://raw.githubusercontent.com/KeyWeeUsr/kDicts/master/scrs/v0.6.png)
+![alt text](https://raw.githubusercontent.com/KeyWeeUsr/kDicts/master/scrs/v0.7.png)
 
 ### Version
+0.7
+- Added scrolling to manual editing
+- Added new colors
+
 0.6
 - Backup&Restore support
 - App backup-trash cleaner
