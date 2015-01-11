@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 __author__ = "KeyWeeUsr"
-__version__ = "0.7.0"
+__version__ = "0.8.0"
 
 from kivy.app import App
 from kivy.lang import Builder
@@ -44,7 +44,7 @@ Builder.load_string('''
                 on_release: root.ids.sm.transition.direction = 'down'
                 on_release: root.ids.sm.current = 'backup'
         Label:
-            text: 'kDicts v0.7'
+            text: 'kDicts v0.8'
         BoxLayout:
             BubbleButton:
                 text: 'Color'
@@ -125,6 +125,32 @@ Builder.load_string('''
                     pos_hint: {'center_x':0.5}
                     on_release: root.ids.sm.transition.direction = 'up'
                     on_release: root.ids.sm.current = 'main'
+        Screen:
+            name: 'quicknotes'
+            BoxLayout:
+                orientation: 'vertical'
+                ScrollView:
+                    TextInput:
+                        id: QuickNotes
+                        text: ''
+                        size_hint: 1,None
+                        hint_text_color: 1,1,1,1
+                        foreground_color: 1,1,1,1
+                        background_color: 0,0,0,0
+                        height: max(self.minimum_height, self.parent.height)
+                        hint_text: 'Write a description of the word you can\\'t translate correctly right now, note down pages with words you should revise if you use any kind of school-book or use it even as a little notebook. Be creative! :)'
+                BoxLayout:
+                    size_hint: 0.5,0.1
+                    pos_hint: {'center_x':0.5,'center_y':0.5}
+                    BubbleButton:
+                        text: 'Reload'
+                        on_release: root.QNreload(root.ids.QuickNotes.text)
+                    BubbleButton:
+                        text: 'Save'
+                        on_release: root.QNsave(root.ids.QuickNotes.text)
+                    BubbleButton:
+                        text: 'Back'
+                        on_release: root.ids.sm.current='main'
 
 <Word>
     size_hint: 1,None
@@ -143,6 +169,11 @@ Builder.load_string('''
         size_hint:0.5,0.7
         pos_hint: {'center_x':0.5,'center_y':0.5}
         orientation: 'vertical'
+        BubbleButton:
+            text: 'Quick note'
+            size_hint: 1,0.20
+            on_release: root.dismiss()
+            on_release: root.body.ids.sm.current='quicknotes'
         Spinner:
             id: wordclass
             size_hint: 0.9,0.2
@@ -190,7 +221,7 @@ Builder.load_string('''
         size_hint: 0.8,0.8
         orientation: 'vertical'
         Label:
-            text: '(C) KeyWeeUsr\\n(P.B.) 2014\\n[i]https://github.com/KeyWeeUsr[/i]\\n[i]https://facebook.com/kDicts[/i]'
+            text: '(C) KeyWeeUsr\\n(Peter Badida) 2014 - 2015\\n[i]https://github.com/KeyWeeUsr[/i]\\n[i]https://facebook.com/kDicts[/i]'
             markup: True
 
 <EditHelp>:
@@ -488,6 +519,17 @@ class Body(BoxLayout):
                     os.remove(self.path+'/'+files[i])
                 self.trash = len(files)
         else: pass
+
+    def QNreload(self, text):
+        try:
+            with open(self.app_path+'/quicknotes.txt') as f:
+                self.ids.QuickNotes.text = str(f.read())
+        except:
+            self.ids.QuickNotes.text = 'File does not exist! You need to save one first!'
+
+    def QNsave(self, text):
+        with open(self.app_path+'/quicknotes.txt','w') as f:
+            f.write(text)
 
 class kDicts(App):
         
